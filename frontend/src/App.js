@@ -11,8 +11,10 @@ import Registered from './pages/Registered';
 import Contact from './pages/Contact';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Events from './pages/Events';
+import Feedbacks from './pages/Feedbacks';
 
-function NavBarWithSearch({ token, username, setToken, setUsername, handleLogout, dropdownOpen, setDropdownOpen, scrolled }) {
+function NavBarWithSearch({ token, username, setToken, setUsername, handleLogout, dropdownOpen, setDropdownOpen, scrolled, role }) {
   const [search, setSearch] = React.useState('');
   const [searchResults, setSearchResults] = React.useState([]);
   const [allEvents, setAllEvents] = React.useState([]);
@@ -20,9 +22,14 @@ function NavBarWithSearch({ token, username, setToken, setUsername, handleLogout
   const searchRef = React.useRef();
   const navigate = useNavigate();
 
-  React.useEffect(() => {
+  // Fetch events from backend
+  const fetchEvents = React.useCallback(() => {
     axios.get('http://localhost:5000/api/events').then(res => setAllEvents(res.data));
   }, []);
+
+  React.useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
 
   React.useEffect(() => {
     if (search.trim() === '') {
@@ -65,7 +72,7 @@ function NavBarWithSearch({ token, username, setToken, setUsername, handleLogout
               style={{ minWidth: '180px' }}
               value={search}
               onChange={e => { setSearch(e.target.value); setSearchOpen(true); }}
-              onFocus={() => setSearchOpen(true)}
+              onFocus={() => { fetchEvents(); setSearchOpen(true); }}
               autoComplete="off"
             />
             <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-[#7f5af0] hover:text-[#6241c7] focus:outline-none" tabIndex={-1}>
@@ -101,10 +108,14 @@ function NavBarWithSearch({ token, username, setToken, setUsername, handleLogout
         </div>
         <div className="space-x-6 text-lg font-semibold flex items-center">
           <Link to="/" className="text-white hover:text-[#7f5af0] transition">Home</Link>
+          <Link to="/events" className="text-white hover:text-[#7f5af0] transition">Events</Link>
           {token && (
             <>
               <Link to="/calendar" className="text-white hover:text-[#7f5af0] transition">Calendar</Link>
               <Link to="/registered" className="text-white hover:text-[#7f5af0] transition">Registered</Link>
+              {role === 'admin' && (
+                <Link to="/users" className="text-white hover:text-[#7f5af0] transition">All Users</Link>
+              )}
             </>
           )}
           {token ? (
@@ -141,9 +152,41 @@ function NavBarWithSearch({ token, username, setToken, setUsername, handleLogout
   );
 }
 
+// Placeholder for AllUsers page
+function AllUsers({ token }) {
+  const [users, setUsers] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  React.useEffect(() => {
+    fetch('http://localhost:5000/api/auth/users', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => setUsers(data))
+      .finally(() => setLoading(false));
+  }, [token]);
+  return (
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#7f5af0] via-[#232946] to-black flex flex-col items-center py-16 px-2">
+      <div className="w-full max-w-2xl mx-auto bg-black/80 rounded-3xl shadow-2xl p-8 border border-white/10 backdrop-blur-md">
+        <h2 className="text-3xl font-black text-[#b8b8ff] mb-8 text-center font-sans">All Users</h2>
+        {loading ? <div className="text-white text-center">Loading...</div> : (
+          <ul className="space-y-4">
+            {users.map(u => (
+              <li key={u._id || u.id} className="bg-[#7f5af0]/20 rounded-xl p-4 flex flex-col md:flex-row md:items-center md:justify-between">
+                <span className="text-white font-semibold">{u.username}</span>
+                <span className="text-[#b8b8ff] font-mono text-sm">{u.role}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [token, setToken] = React.useState(localStorage.getItem('token'));
   const [username, setUsername] = React.useState(localStorage.getItem('username'));
+  const [role, setRole] = React.useState(localStorage.getItem('role'));
   const [scrolled, setScrolled] = React.useState(false);
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
 
@@ -168,18 +211,22 @@ function App() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [dropdownOpen]);
 
-  const handleLogin = (token, username) => {
+  const handleLogin = (token, username, role) => {
     localStorage.setItem('token', token);
     localStorage.setItem('username', username);
+    localStorage.setItem('role', role);
     setToken(token);
     setUsername(username);
+    setRole(role);
   };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
+    localStorage.removeItem('role');
     setToken(null);
     setUsername(null);
+    setRole(null);
     setDropdownOpen(false);
     window.location = '/';
   };
@@ -195,19 +242,23 @@ function App() {
         dropdownOpen={dropdownOpen}
         setDropdownOpen={setDropdownOpen}
         scrolled={scrolled}
+        role={role}
       />
       <div className="pt-20">
         <Routes>
-          <Route path="/" element={<EventList token={token} />} />
+          <Route path="/" element={<EventList token={token} role={role} />} />
           <Route path="/login" element={<Login onLogin={handleLogin} />} />
           <Route path="/register" element={<SignUp onLogin={handleLogin} />} />
-          <Route path="/register/:eventId" element={<Register token={token} />} />
-          <Route path="/registered" element={<Registered token={token} />} />
-          <Route path="/events/:id" element={<EventDetails token={token} />} />
-          <Route path="/create" element={token ? <EventForm token={token} /> : <Navigate to="/login" />} />
-          <Route path="/edit/:id" element={token ? <EventForm token={token} edit /> : <Navigate to="/login" />} />
+          <Route path="/register/:eventId" element={<Register token={token} role={role} />} />
+          <Route path="/registered" element={<Registered token={token} role={role} />} />
+          <Route path="/events" element={<Events token={token} role={role} />} />
+          <Route path="/events/:id" element={<EventDetails token={token} role={role} />} />
+          <Route path="/create" element={token && role === 'admin' ? <EventForm token={token} /> : <Navigate to="/login" />} />
+          <Route path="/edit/:id" element={token && role === 'admin' ? <EventForm token={token} edit /> : <Navigate to="/login" />} />
           <Route path="/calendar" element={token ? <Calendar token={token} /> : <Navigate to="/login" />} />
+          <Route path="/users" element={token && role === 'admin' ? <AllUsers token={token} /> : <Navigate to="/login" />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/feedbacks" element={token && role === 'admin' ? <Feedbacks token={token} role={role} /> : <Navigate to="/login" />} />
         </Routes>
       </div>
     </BrowserRouter>

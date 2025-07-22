@@ -5,8 +5,16 @@ console.log('Booking model loaded:', typeof Booking); // Test log for model load
 const auth = require('../middleware/auth');
 const router = express.Router();
 
+// Admin check middleware
+function isAdmin(req, res, next) {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ msg: 'Admins only' });
+  }
+  next();
+}
+
 // Create event
-router.post('/', auth, async (req, res) => {
+router.post('/', auth, isAdmin, async (req, res) => {
   const { title, description, date, price } = req.body;
   try {
     const event = new Event({ title, description, date, price, createdBy: req.user.id });
@@ -83,11 +91,10 @@ router.get('/:id', async (req, res) => {
 });
 
 // Update event
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', auth, isAdmin, async (req, res) => {
   try {
     let event = await Event.findById(req.params.id);
     if (!event) return res.status(404).json({ msg: 'Event not found' });
-    if (event.createdBy.toString() !== req.user.id) return res.status(401).json({ msg: 'Not authorized' });
     event = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(event);
   } catch (err) {
@@ -97,11 +104,10 @@ router.put('/:id', auth, async (req, res) => {
 });
 
 // Delete event
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', auth, isAdmin, async (req, res) => {
   try {
     let event = await Event.findById(req.params.id);
     if (!event) return res.status(404).json({ msg: 'Event not found' });
-    if (event.createdBy.toString() !== req.user.id) return res.status(401).json({ msg: 'Not authorized' });
     await Event.findByIdAndDelete(req.params.id);
     res.json({ msg: 'Event removed' });
   } catch (err) {

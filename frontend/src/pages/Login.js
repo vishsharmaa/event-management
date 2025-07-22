@@ -14,7 +14,7 @@ export default function Login({ onLogin }) {
     setError('');
     try {
       const res = await axios.post('http://localhost:5000/api/auth/login', form);
-      if (onLogin) onLogin(res.data.token, res.data.username);
+      if (onLogin) onLogin(res.data.token, res.data.username, res.data.role);
       navigate('/');
     } catch (err) {
       setError('Invalid username or password');

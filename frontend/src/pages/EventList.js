@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-export default function EventList({ token }) {
+export default function EventList({ token, role }) {
   // Example stats and avatars (replace with real data if needed)
   const stats = [
     { label: 'Events Hosted', value: '192k' },
@@ -30,13 +30,23 @@ export default function EventList({ token }) {
           <p className="text-base md:text-lg lg:text-xl font-light text-white/90 mb-6 text-left max-w-md" style={{ fontFamily: 'Inter, Poppins, Arial, sans-serif' }}>
             &#125; Renowned for powering the backbone of event communities with our state-of-the-art management, discovery, and sharing platform.
           </p>
-          <Link
-            to="/contact"
-            className="inline-block bg-black text-white px-12 py-4 rounded-full font-mono font-semibold text-base md:text-lg tracking-widest uppercase shadow-lg hover:bg-[#7f5af0] hover:text-white transition border-none"
-            style={{ letterSpacing: '0.15em' }}
-          >
-            Get in Touch
-          </Link>
+          {role === 'admin' ? (
+            <Link
+              to="/feedbacks"
+              className="inline-block bg-black text-white px-12 py-4 rounded-full font-mono font-semibold text-base md:text-lg tracking-widest uppercase shadow-lg hover:bg-[#7f5af0] hover:text-white transition border-none"
+              style={{ letterSpacing: '0.15em' }}
+            >
+              Feedbacks
+            </Link>
+          ) : (
+            <Link
+              to="/contact"
+              className="inline-block bg-black text-white px-12 py-4 rounded-full font-mono font-semibold text-base md:text-lg tracking-widest uppercase shadow-lg hover:bg-[#7f5af0] hover:text-white transition border-none"
+              style={{ letterSpacing: '0.15em' }}
+            >
+              Get in Touch
+            </Link>
+          )}
         </div>
       </div>
       {/* Stylish Stat Card Section */}
@@ -67,7 +77,7 @@ export default function EventList({ token }) {
         </div>
       </div>
       {/* Floating Create Button */}
-      {token && (
+      {token && role === 'admin' && (
         <Link
           to="/create"
           className="fixed bottom-8 right-8 z-50 bg-[#7f5af0] text-white rounded-full shadow-lg p-5 flex items-center justify-center text-3xl hover:bg-[#6241c7] transition"
