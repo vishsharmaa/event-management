@@ -22,7 +22,6 @@ function NavBarWithSearch({ token, username, setToken, setUsername, handleLogout
   const searchRef = React.useRef();
   const navigate = useNavigate();
 
-  // Fetch events from backend
   const fetchEvents = React.useCallback(() => {
     axios.get('http://localhost:5000/api/events').then(res => setAllEvents(res.data));
   }, []);
@@ -63,7 +62,6 @@ function NavBarWithSearch({ token, username, setToken, setUsername, handleLogout
       <div className="max-w-7xl mx-auto flex justify-between items-center px-6">
         <div className="flex items-center space-x-4">
           <Link to="/" className="text-lg font-light tracking-widest text-white/80 hover:text-[#7f5af0] transition font-sans" style={{ fontFamily: 'Poppins, Inter, Arial, sans-serif' }}>Eventify</Link>
-          {/* Search Bar */}
           <div className="relative hidden sm:block" ref={searchRef}>
             <input
               type="text"
@@ -152,7 +150,6 @@ function NavBarWithSearch({ token, username, setToken, setUsername, handleLogout
   );
 }
 
-// Placeholder for AllUsers page
 function AllUsers({ token }) {
   const [users, setUsers] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -191,7 +188,6 @@ function App() {
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
 
   React.useEffect(() => {
-    // Always sync username from localStorage on mount
     setUsername(localStorage.getItem('username'));
   }, []);
 

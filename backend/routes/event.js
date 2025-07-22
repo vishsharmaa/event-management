@@ -1,11 +1,8 @@
 const express = require('express');
 const Event = require('../models/Event');
 const Booking = require('../models/Booking');
-console.log('Booking model loaded:', typeof Booking); // Test log for model loading
 const auth = require('../middleware/auth');
 const router = express.Router();
-
-// Admin check middleware
 function isAdmin(req, res, next) {
   if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({ msg: 'Admins only' });
@@ -13,7 +10,6 @@ function isAdmin(req, res, next) {
   next();
 }
 
-// Create event
 router.post('/', auth, isAdmin, async (req, res) => {
   const { title, description, date, price } = req.body;
   try {
@@ -26,7 +22,6 @@ router.post('/', auth, isAdmin, async (req, res) => {
   }
 });
 
-// Get all events
 router.get('/', async (req, res) => {
   try {
     const events = await Event.find().populate('createdBy', 'username');
@@ -37,10 +32,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Book an event
 router.post('/:id/book', auth, async (req, res) => {
   try {
-    // Prevent duplicate bookings
     const existing = await Booking.findOne({ user: req.user.id, event: req.params.id });
     if (existing) return res.status(400).json({ msg: 'Already booked' });
     const booking = new Booking({ user: req.user.id, event: req.params.id });
@@ -52,7 +45,6 @@ router.post('/:id/book', auth, async (req, res) => {
   }
 });
 
-// Get all events booked by the logged-in user
 router.get('/booked', auth, async (req, res) => {
   console.log('GET /booked route hit');
   try {
@@ -66,7 +58,6 @@ router.get('/booked', auth, async (req, res) => {
   }
 });
 
-// Delete a booking for an event by the logged-in user
 router.delete('/:id/book', auth, async (req, res) => {
   try {
     const booking = await Booking.findOneAndDelete({ user: req.user.id, event: req.params.id });
@@ -78,7 +69,6 @@ router.delete('/:id/book', auth, async (req, res) => {
   }
 });
 
-// Get event by id (keep this LAST)
 router.get('/:id', async (req, res) => {
   try {
     const event = await Event.findById(req.params.id).populate('createdBy', 'username');
@@ -90,7 +80,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Update event
 router.put('/:id', auth, isAdmin, async (req, res) => {
   try {
     let event = await Event.findById(req.params.id);
@@ -103,7 +92,6 @@ router.put('/:id', auth, isAdmin, async (req, res) => {
   }
 });
 
-// Delete event
 router.delete('/:id', auth, isAdmin, async (req, res) => {
   try {
     let event = await Event.findById(req.params.id);
