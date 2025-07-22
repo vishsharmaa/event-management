@@ -8,7 +8,6 @@ export default function Register({ token }) {
   const [booked, setBooked] = useState(false);
   const [error, setError] = useState('');
 
-  // If eventId is missing or invalid, show an error and do not make the API call
   if (!eventId || eventId === 'undefined') {
     return (
       <div className="text-center mt-10 text-white">

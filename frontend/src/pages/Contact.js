@@ -3,13 +3,32 @@ import React, { useState } from 'react';
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    setSent(true);
-    // In a real app, send the form data to the backend or email service here
+    setError('');
+    setSent(false);
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        await fetch('http://localhost:5000/api/auth/feedbacks', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ message: form.message })
+        });
+        setSent(true);
+      } catch (err) {
+        setError('Failed to send feedback.');
+      }
+    } else {
+      setError('You must be logged in to send feedback.');
+    }
   };
 
   return (
@@ -45,6 +64,7 @@ export default function Contact() {
               required
               className="w-full px-4 py-3 bg-white/10 text-white border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7f5af0] font-semibold placeholder-white/60 min-h-[120px]"
             />
+            {error && <div className="text-red-400 text-center">{error}</div>}
             <button type="submit" className="w-full bg-[#7f5af0] text-white py-3 rounded-full font-mono font-semibold text-lg tracking-widest uppercase shadow-lg hover:bg-[#6241c7] transition border-none">Send</button>
           </form>
         )}
