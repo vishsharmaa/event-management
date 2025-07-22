@@ -11,7 +11,6 @@ Eventify is a full-stack event management web application built with the MERN st
 - Register (book) for events
 - View and unregister from registered events
 - Submit feedback via the "Get in Touch" form (visible only to admin)
-- Edit profile (if implemented)
 
 ### Admin Features
 - Create, edit, and delete any event
@@ -22,8 +21,8 @@ Eventify is a full-stack event management web application built with the MERN st
 ## Tech Stack
 - **Frontend:** React, Tailwind CSS
 - **Backend:** Node.js, Express.js
-- **Database:** MongoDB (Mongoose ODM)
-- **Authentication:** JWT (JSON Web Token)
+- **Database:** MongoDB 
+- **Authentication:** JWT 
 
 ## Usage
 
@@ -40,5 +39,3 @@ Eventify is a full-stack event management web application built with the MERN st
 ## Project Structure
 - `backend/` - Node.js/Express API, MongoDB models, authentication, admin/user logic
 - `frontend/` - React app, pages, components, Tailwind CSS styling
-
----

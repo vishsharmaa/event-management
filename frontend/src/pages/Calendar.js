@@ -3,13 +3,11 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 function getMonthMatrix(year, month) {
-  // Returns a 2D array representing the weeks of the month
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
   const matrix = [];
   let week = [];
   let dayOfWeek = firstDay.getDay();
-  // Fill initial empty days
   for (let i = 0; i < dayOfWeek; i++) week.push(null);
   for (let d = 1; d <= lastDay.getDate(); d++) {
     week.push(new Date(year, month, d));
@@ -18,7 +16,6 @@ function getMonthMatrix(year, month) {
       week = [];
     }
   }
-  // Fill trailing empty days
   if (week.length) {
     while (week.length < 7) week.push(null);
     matrix.push(week);
@@ -103,8 +100,7 @@ export default function Calendar() {
               </div>
             );
           })}
-        </div>
-        {/* Modal for multiple events on a day */}
+        </div>    
         {modal.open && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
             <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md relative">

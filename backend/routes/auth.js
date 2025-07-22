@@ -5,7 +5,6 @@ const User = require('../models/User');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const Feedback = require('../models/Feedback');
-// Admin check middleware
 function isAdmin(req, res, next) {
   if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({ msg: 'Admins only' });
@@ -38,7 +37,6 @@ router.post('/login', async (req, res) => {
     if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ msg: 'Invalid credentials' });
-    // Ensure role is correct in case username is 'admin' (case-insensitive)
     let role = user.role;
     if (username.trim().toLowerCase() === 'admin' && user.role !== 'admin') {
       user.role = 'admin';
@@ -55,7 +53,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Admin: Get all users
 router.get('/users', auth, isAdmin, async (req, res) => {
   try {
     const users = await User.find({}, 'id username role');
@@ -64,8 +61,6 @@ router.get('/users', auth, isAdmin, async (req, res) => {
     res.status(500).send('Server error');
   }
 });
-
-// User: Submit feedback
 router.post('/feedbacks', auth, async (req, res) => {
   try {
     const feedback = new Feedback({ user: req.user.id, message: req.body.message });
@@ -75,7 +70,6 @@ router.post('/feedbacks', auth, async (req, res) => {
     res.status(500).send('Server error');
   }
 });
-// Admin: Get all feedbacks
 router.get('/feedbacks', auth, isAdmin, async (req, res) => {
   try {
     const feedbacks = await Feedback.find().populate('user', 'username').sort({ createdAt: -1 });
