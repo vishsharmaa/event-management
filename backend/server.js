@@ -14,7 +14,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 
-// Connect to MongoDB and start the server
+
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -25,5 +25,5 @@ mongoose.connect(process.env.MONGO_URI, {
   })
   .catch(err => {
     console.error('Failed to connect to MongoDB:', err);
-    process.exit(1); // Exit if DB connection fails
+    process.exit(1); 
   });
